@@ -3,11 +3,11 @@ steps:
     command: |
       set -euo pipefail
       your_test_command 2>&1 | tee build.log
-      
-      # Create annotation if deprecations found
       if grep -i "deprecat" build.log | sort -u > /tmp/deps.txt && [ -s /tmp/deps.txt ]; then
-        { echo "## Deprecation Warnings"; echo '```'; cat /tmp/deps.txt; echo '```'; } | \
-        buildkite-agent annotate --style "warning" --context "deprecations"
+        echo "## Deprecation Warnings" > /tmp/annotation.md
+        echo '```' >> /tmp/annotation.md
+        cat /tmp/deps.txt >> /tmp/annotation.md
+        echo '```' >> /tmp/annotation.md
+        buildkite-agent annotate --style "warning" --context "deprecations" < /tmp/annotation.md
       fi
-      
       exit ${PIPESTATUS[0]}
