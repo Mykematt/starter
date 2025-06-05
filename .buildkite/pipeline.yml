@@ -1,22 +1,13 @@
 steps:
-  - label: "Test Success Job"
+  - label: "🧪 Tests with Deprecations"
     command: |
-      echo "This job will succeed"
-      sleep 10
-      echo "Success completed!"
-    agents:
-      queue: "mac"
-
-  - label: "Another Success Job"
-    command: |
-      echo "This job will also succeed"
-      sleep 5
-      echo "All good!"
-    agents:
-      queue: "mac"
-
-  - label: "Save Environment File"
-    command: |
-      env > "environment-${BUILDKITE_BUILD_NUMBER}.txt"
-    artifact_paths:
-      - "environment-*.txt"
+      set -euo pipefail
+      your_test_command 2>&1 | tee build.log
+      
+      # Create annotation if deprecations found
+      if grep -i "deprecat" build.log | sort -u > /tmp/deps.txt && [ -s /tmp/deps.txt ]; then
+        { echo "## 🚨 Deprecation Warnings"; echo '```'; cat /tmp/deps.txt; echo '```'; } | \
+        buildkite-agent annotate --style "warning" --context "deprecations"
+      fi
+      
+      exit ${PIPESTATUS[0]}
