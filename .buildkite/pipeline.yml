@@ -1,5 +1,5 @@
 steps:
-  - label: "Tests with Deprecations"
+  - label: "Testing with Deprecations"
     command: |
       set -euo pipefail
       your_test_command 2>&1 | tee build.log
