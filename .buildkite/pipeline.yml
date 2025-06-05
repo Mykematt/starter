@@ -10,7 +10,7 @@ steps:
   - label: "Another Success Job"
     command: |
       echo "This job will also succeed"
-      sleep 5
+      sleep 4
       echo "All good!"
     agents:
       queue: "mac"
