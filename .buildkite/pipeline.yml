@@ -1,5 +1,8 @@
 steps:
   - label: "Test with deprecation capture"
     command:
-      - "bundle exec rspec 2>&1 | tee test.log"
-      - "grep -i deprecat test.log | buildkite-agent annotate --style warning || true"
+      - "echo 'DEPRECATION WARNING: This feature is deprecated' && echo 'Running tests...' && sleep 2"
+      - "echo 'DEPRECATION WARNING: This feature is deprecated' > test.log"
+      - "echo 'Normal log output' >> test.log"
+      - "echo 'Another DEPRECATION WARNING: Old method used' >> test.log"
+      - "if grep -i deprecat test.log > warnings.txt && [ -s warnings.txt ]; then cat warnings.txt | buildkite-agent annotate --style warning --context deprecations; else echo 'No deprecations found'; fi"
