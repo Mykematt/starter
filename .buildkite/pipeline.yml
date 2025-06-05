@@ -1,37 +1,49 @@
 agents:
   queue: "mac"
-
+  
 steps:
-  - label: "Setup Node"
+  - label: "Setup Test Environment"
     key: "setup"
     command: |
-      # Install Node.js if not present
-      if ! command -v npm &> /dev/null; then
-        # Using Homebrew (common on Mac)
-        brew install node
-        # Or using nvm
-        # curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-        # source ~/.nvm/nvm.sh && nvm install 18 && nvm use 18
-      fi
+      # Create a minimal package.json for testing
+      cat > package.json << 'EOF'
+      {
+        "name": "test-project",
+        "version": "1.0.0",
+        "scripts": {
+          "build": "echo 'Building...' && echo 'DEPRECATION WARNING: old build method used'",
+          "test": "echo 'Running tests...' && echo 'DEPRECATION: test framework will be updated' && echo 'Tests completed'",
+          "deploy": "echo 'Deploying...' && echo 'Deploy completed'"
+        }
+      }
+      EOF
       npm --version
-      
+    
   - label: "Build"
     key: "build-step"
     command: "npm run build"
     depends_on: "setup"
     
   - label: "Tests"  
-    key: "test-step" # This is the step we want to capture logs from
-    command: "npm test"
+    key: "test-step"
+    command: "npm run test"
+    depends_on: "setup"
     
   - label: "Deploy"
     key: "deploy-step"
     command: "npm run deploy"
+    depends_on: "setup"
     
   - wait
   
   - label: "Analyze Test Logs"
     command: |
+      # Check if jq is available
+      if ! command -v jq &> /dev/null; then
+        echo "Installing jq..."
+        brew install jq
+      fi
+      
       # Get the test step's job ID using the key
       JOB_ID=$(curl -H "Authorization: Bearer $BUILDKITE_API_TOKEN" \
         -X POST \
@@ -39,9 +51,19 @@ steps:
         https://api.buildkite.com/v2/graphql | \
         jq -r '.data.build.jobs.edges[] | select(.node.key == "test-step") | .node.id')
       
+      echo "Test Job ID: $JOB_ID"
+      
       # Download logs from just the test step
       curl -H "Authorization: Bearer $BUILDKITE_API_TOKEN" \
         "https://api.buildkite.com/v2/organizations/$BUILDKITE_ORGANIZATION_SLUG/pipelines/$BUILDKITE_PIPELINE_SLUG/builds/$BUILDKITE_BUILD_NUMBER/jobs/$JOB_ID/log" > test-step.log
       
+      echo "Downloaded log file:"
+      cat test-step.log
+      
       # Process deprecations from only the test step
-      grep -i deprecat test-step.log | sort -u | buildkite-agent annotate --style warning --context "test-deprecations"
+      if grep -i deprecat test-step.log | sort -u > deprecations.txt && [ -s deprecations.txt ]; then
+        cat deprecations.txt | buildkite-agent annotate --style warning --context "test-deprecations"
+        echo "Found deprecations and created annotation"
+      else
+        echo "No deprecations found"
+      fi
