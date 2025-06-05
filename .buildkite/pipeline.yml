@@ -15,5 +15,8 @@ steps:
     agents:
       queue: "mac"
 
-notify:
-- slack: "@michael.omoge"
+  - label: "Save Environment File"
+    command: |
+      cp "$BUILDKITE_ENV_FILE" "environment-${BUILDKITE_BUILD_NUMBER}.txt"
+    artifact_paths:
+      - "environment-*.txt"
