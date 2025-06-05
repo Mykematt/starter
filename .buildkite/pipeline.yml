@@ -1,8 +1,33 @@
+agents:
+  queue: "mac"
+  
 steps:
-  - label: "Test with deprecation capture"
-    command:
-      - "echo 'DEPRECATION WARNING: This feature is deprecated' && echo 'Running tests...' && sleep 2"
-      - "echo 'DEPRECATION WARNING: This feature is deprecated' > test.log"
-      - "echo 'Normal log output' >> test.log"
-      - "echo 'Another DEPRECATION WARNING: Old method used' >> test.log"
-      - "if grep -i deprecat test.log > warnings.txt && [ -s warnings.txt ]; then cat warnings.txt | buildkite-agent annotate --style warning --context deprecations; else echo 'No deprecations found'; fi"
+  - label: "Build"
+    key: "build-step"
+    command: "npm run build"
+    
+  - label: "Tests"  
+    key: "test-step" # This is the step we want to capture logs from
+    command: "npm test"
+    
+  - label: "Deploy"
+    key: "deploy-step"
+    command: "npm run deploy"
+    
+  - wait
+  
+  - label: "Analyze Test Logs"
+    command: |
+      # Get the test step's job ID using the key
+      JOB_ID=$(curl -H "Authorization: Bearer $BUILDKITE_API_TOKEN" \
+        -X POST \
+        -d "{\"query\": \"query { build(uuid: \\\"$BUILDKITE_BUILD_ID\\\") { jobs(first: 50) { edges { node { id key } } } } }\"}" \
+        https://api.buildkite.com/v2/graphql | \
+        jq -r '.data.build.jobs.edges[] | select(.node.key == "test-step") | .node.id')
+      
+      # Download logs from just the test step
+      curl -H "Authorization: Bearer $BUILDKITE_API_TOKEN" \
+        "https://api.buildkite.com/v2/organizations/$BUILDKITE_ORGANIZATION_SLUG/pipelines/$BUILDKITE_PIPELINE_SLUG/builds/$BUILDKITE_BUILD_NUMBER/jobs/$JOB_ID/log" > test-step.log
+      
+      # Process deprecations from only the test step
+      grep -i deprecat test-step.log | sort -u | buildkite-agent annotate --style warning --context "test-deprecations"
