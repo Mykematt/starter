@@ -1,31 +1,15 @@
-agents:
-  queue: "mac"
-  
 steps:
-  - label: "Build"
-    key: "build-step"
-    command: |
-      echo "Building..."
-      echo "DEPRECATION WARNING: old build method used"
-      echo "Build completed"
-    
-  - label: "Tests"  
-    key: "test-step"
-    command: |
-      echo "Running tests..."
-      echo "DEPRECATION: test framework will be updated"
-      echo "Another DEPRECATION WARNING: old assertion method"
-      echo "Tests completed"
-    
-  - label: "Deploy"
-    key: "deploy-step"
-    command: |
-      echo "Deploying..."
-      echo "Deploy completed"
-    
-  - wait
-  
-  - label: "Analyze Test Logs"
-    command: |
-      echo "Starting log analysis..."
-      # Your API calls here
+  - label: "Test Success Job"
+    agents:
+      queue: "mac"
+    command: "echo \"This job will succeed\"\nsleep 10\necho \"Success completed!\"\n"
+  - label: "Another Success Job"
+    agents:
+      queue: "mac"
+    command: "echo \"This job will also succeed\"\nsleep 5\necho \"All good!\"\n"
+
+notify:
+  - slack:
+      channels:
+        - "#all-testing"
+      message: "This message will ping the user with ID U08V62G9EP9 <@U08V62G9EP9>!"
