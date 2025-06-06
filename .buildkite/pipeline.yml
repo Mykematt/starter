@@ -11,5 +11,5 @@ steps:
 notify:
   - slack:
       channels:
-        - "#all-testing"
-      message: "This message will ping the user with ID U08V62G9EP9 <@U08V62G9EP9>!"
+        - "#ola-testing"
+      message: "This message will ping the user with <@U08SQPXLH26>!"
