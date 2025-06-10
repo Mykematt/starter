@@ -1,15 +1,8 @@
 steps:
-  - label: "Test Success Job"
-    agents:
-      queue: "mac"
-    command: "echo \"This job will succeed\"\nsleep 10\necho \"Success completed!\"\n"
-  - label: "Another Success Job"
-    agents:
-      queue: "mac"
-    command: "echo \"This job will also succeed\"\nsleep 5\necho \"All good!\"\n"
-
-notify:
-  - slack:
-      channels:
-        - "#ola-testing"
-      message: "This message will ping the user with <@michael.omoge>!"
+  - label: "Test Build Creator vs Author"
+    command: |
+      echo "Build Creator: $BUILDKITE_BUILD_CREATOR"
+      echo "Build Creator Email: $BUILDKITE_BUILD_CREATOR_EMAIL"
+      echo "Build Author: $BUILDKITE_BUILD_AUTHOR" 
+      echo "Build Author Email: $BUILDKITE_BUILD_AUTHOR_EMAIL"
+      echo "Who should get error notifications: $BUILDKITE_BUILD_CREATOR"
