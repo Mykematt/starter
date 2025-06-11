@@ -18,5 +18,5 @@ steps:
       echo "Now on branch: $(git branch --show-current)"
       # Replace with your actual build commands
       echo "Building on target branch..."
-      ls -la  # Just to show the checkout worked
+      ls -la  # Just to show the checkout workedd
     label: "Build target branch from metadata"
