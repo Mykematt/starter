@@ -1,8 +1,22 @@
 steps:
-  - label: "Test Build Creator vs Author"
-    command: |
-      echo "Build Creator: $BUILDKITE_BUILD_CREATOR"
-      echo "Build Creator Email: $BUILDKITE_BUILD_CREATOR_EMAIL"
-      echo "Build Author: $BUILDKITE_BUILD_AUTHOR" 
-      echo "Build Author Email: $BUILDKITE_BUILD_AUTHOR_EMAIL"
-      echo "Who should get error notifications: $BUILDKITE_BUILD_CREATOR"
+  - command: |
+      echo "Setting target branch metadata"
+      buildkite-agent meta-data set "target-branch" "slack"
+      echo "Current branch: $BUILDKITE_BRANCH"
+      # Replace with your actual build commands
+      echo "Building on current branch..."
+      ls -la  # Just to show we're doing something
+    label: "Build current branch & set metadata"
+    
+  - wait
+    
+  - command: |
+      TARGET_BRANCH=$(buildkite-agent meta-data get "target-branch")
+      echo "Target branch from metadata: $TARGET_BRANCH"
+      git fetch origin "$TARGET_BRANCH"
+      git checkout "$TARGET_BRANCH"
+      echo "Now on branch: $(git branch --show-current)"
+      # Replace with your actual build commands
+      echo "Building on target branch..."
+      ls -la  # Just to show the checkout worked
+    label: "Build target branch from metadata"
