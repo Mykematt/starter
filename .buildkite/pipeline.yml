@@ -1,22 +1,26 @@
 steps:
   - command: |
-      echo "Setting target branch metadata"
+      echo "=== STEP 1: Setting metadata ==="
+      echo "About to set target-branch to slack"
       buildkite-agent meta-data set "target-branch" "slack"
-      echo "Metadata set successfully"
-      echo "Current branch: $BUILDKITE_BRANCH"
-    label: "Step 1: Set metadata"
+      echo "Metadata set command completed"
+      echo "Verifying metadata was set..."
+      VERIFY=$(buildkite-agent meta-data get "target-branch")
+      echo "Verification result: '$VERIFY'"
+      if [ "$VERIFY" = "slack" ]; then
+        echo "✅ Metadata set successfully!"
+      else
+        echo "❌ Metadata setting failed!"
+      fi
+    label: "Step 1: Set and verify metadata"
     
   - wait
     
   - command: |
-      echo "Getting target branch from metadata"
+      echo "=== STEP 2: Getting metadata ==="
+      echo "All available metadata keys:"
+      buildkite-agent meta-data keys
       TARGET_BRANCH=$(buildkite-agent meta-data get "target-branch")
-      if [ -z "$TARGET_BRANCH" ]; then
-        echo "ERROR: No target branch found in metadata!"
-        exit 1
-      fi
-      echo "Target branch from metadata: $TARGET_BRANCH"
-      git fetch origin "$TARGET_BRANCH"
-      git checkout "$TARGET_BRANCH"
-      echo "Now on branch: $(git branch --show-current)"
-    label: "Step 2: Use metadata"
+      echo "Retrieved target branch: '$TARGET_BRANCH'"
+      # ... rest of your step
+    label: "Step 2: Debug and use metadata"
