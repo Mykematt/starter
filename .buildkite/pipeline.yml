@@ -2,21 +2,21 @@ steps:
   - command: |
       echo "Setting target branch metadata"
       buildkite-agent meta-data set "target-branch" "slack"
+      echo "Metadata set successfully"
       echo "Current branch: $BUILDKITE_BRANCH"
-      # Replace with your actual build commands
-      echo "Building on current branch..."
-      ls -la  # Just to show we're doing something
-    label: "Build current branch & set metadata"
+    label: "Step 1: Set metadata"
     
   - wait
     
   - command: |
+      echo "Getting target branch from metadata"
       TARGET_BRANCH=$(buildkite-agent meta-data get "target-branch")
+      if [ -z "$TARGET_BRANCH" ]; then
+        echo "ERROR: No target branch found in metadata!"
+        exit 1
+      fi
       echo "Target branch from metadata: $TARGET_BRANCH"
       git fetch origin "$TARGET_BRANCH"
       git checkout "$TARGET_BRANCH"
       echo "Now on branch: $(git branch --show-current)"
-      # Replace with your actual build commands
-      echo "Building on target branch..."
-      ls -la  # Just to show the checkout workedd
-    label: "Build target branch from metadata"
+    label: "Step 2: Use metadata"
