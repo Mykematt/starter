@@ -1,5 +1,5 @@
 steps:
-  - label: "Deploy nginx web app"
+  - label: "deploy-nginx-web-app"
     command: |
       echo "--- Deploying nginx web app to Kubernetes"
       
@@ -20,7 +20,7 @@ steps:
       queue: "kubernetes"
     timeout_in_minutes: 10
     
-  - label: "Health check"
+  - label: "health-check"
     command: |
       echo "--- Running health checks"
       
@@ -52,5 +52,5 @@ steps:
       
     agents:
       queue: "kubernetes"
-    depends_on: "Deploy nginx web app"
+    depends_on: "deploy-nginx-web-app"
     timeout_in_minutes: 5
