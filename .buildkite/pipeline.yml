@@ -1,6 +1,19 @@
 steps:
   - label: "deploy-nginx-web-app"
     command: |
+      echo "--- Installing kubectl"
+      
+      # Install kubectl if not present
+      if ! command -v kubectl &> /dev/null; then
+        echo "kubectl not found, installing..."
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+      fi
+      
+      # Verify kubectl installation
+      kubectl version --client
+      
       echo "--- Deploying nginx web app to Kubernetes"
       
       # Apply the Kubernetes manifests
@@ -23,6 +36,14 @@ steps:
   - label: "health-check"
     command: |
       echo "--- Running health checks"
+      
+      # Ensure kubectl is available
+      if ! command -v kubectl &> /dev/null; then
+        echo "kubectl not found, installing..."
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+      fi
       
       # Wait for pods to be ready
       kubectl wait --for=condition=ready pod -l app=nginx-webapp -n nginx-app --timeout=300s
