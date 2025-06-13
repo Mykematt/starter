@@ -1,7 +1,7 @@
 steps:
-  - label: ":kubernetes: Deploy nginx web app"
+  - label: "Deploy nginx web app"
     command: |
-      echo "--- :kubernetes: Deploying nginx web app to Kubernetes"
+      echo "--- Deploying nginx web app to Kubernetes"
       
       # Apply the Kubernetes manifests
       kubectl apply -f k8s/namespace.yaml
@@ -9,10 +9,10 @@ steps:
       kubectl apply -f k8s/service.yaml
       kubectl apply -f k8s/ingress.yaml
       
-      echo "--- :mag: Checking deployment status"
+      echo "--- Checking deployment status"
       kubectl rollout status deployment/nginx-webapp -n nginx-app
       
-      echo "--- :white_check_mark: Deployment completed"
+      echo "--- Deployment completed"
       kubectl get pods -n nginx-app
       kubectl get services -n nginx-app
       
@@ -20,9 +20,9 @@ steps:
       queue: "kubernetes"
     timeout_in_minutes: 10
     
-  - label: ":test_tube: Health check"
+  - label: "Health check"
     command: |
-      echo "--- :stethoscope: Running health checks"
+      echo "--- Running health checks"
       
       # Wait for pods to be ready
       kubectl wait --for=condition=ready pod -l app=nginx-webapp -n nginx-app --timeout=300s
@@ -42,9 +42,9 @@ steps:
       
       # Health check
       if curl -f http://localhost:8080/health; then
-        echo ":white_check_mark: Health check passed"
+        echo "Health check passed"
       else
-        echo ":x: Health check failed"
+        echo "Health check failed"
         exit 1
       fi
       
@@ -52,6 +52,5 @@ steps:
       
     agents:
       queue: "kubernetes"
-    depends_on: 
-      - step: ":kubernetes: Deploy nginx web app"
+    depends_on: "Deploy nginx web app"
     timeout_in_minutes: 5
