@@ -1,26 +1,36 @@
 steps:
-  - command: |
-      echo "=== STEP 1: Setting metadata ==="
-      echo "About to set target-branch to slack"
-      buildkite-agent meta-data set "target-branch" "slack"
-      echo "Metadata set command completed"
-      echo "Verifying metadata was set..."
-      VERIFY=$(buildkite-agent meta-data get "target-branch")
-      echo "Verification result: '$VERIFY'"
-      if [ "$VERIFY" = "slack" ]; then
-        echo "✅ Metadata set successfully!"
-      else
-        echo "❌ Metadata setting failed!"
-      fi
-    label: "Step 1: Set and verify metadata"
+  # Step 1: Create and upload artifacts
+  - label: "📦 Build and Upload"
+    command: |
+      echo "Building application..."
+      mkdir -p dist
+      echo "Hello from build step!" > dist/app.txt
+      echo "Build completed at $(date)" > dist/build-info.txt
+      ls -la dist/
+    artifact_paths: "dist/*"
     
-  - wait
-    
-  - command: |
-      echo "=== STEP 2: Getting metadata ==="
-      echo "All available metadata keys:"
-      buildkite-agent meta-data keys
-      TARGET_BRANCH=$(buildkite-agent meta-data get "target-branch")
-      echo "Retrieved target branch: '$TARGET_BRANCH'"
-      # ... rest of your step
-    label: "Step 2: Debug and use metadata"
+  # Step 2: Download and use artifacts
+  - label: "🔽 Download and Test"
+    command: |
+      echo "Checking downloaded artifacts..."
+      ls -la
+      echo "Contents of app.txt:"
+      cat dist/app.txt
+      echo "Contents of build-info.txt:"
+      cat dist/build-info.txt
+      echo "Artifacts successfully downloaded and verified!"
+    depends_on: "build-and-upload"
+    plugins:
+      - artifacts#v1.5.0:
+          download: "dist/*"
+
+  # Step 3: Download specific artifact in another job
+  - label: "🎯 Download Specific File"
+    command: |
+      echo "Downloading only the app.txt file..."
+      cat dist/app.txt
+      echo "Specific file download worked!"
+    depends_on: "build-and-upload"
+    plugins:
+      - artifacts#v1.5.0:
+          download: "dist/app.txt"
