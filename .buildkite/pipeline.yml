@@ -1,5 +1,57 @@
 steps:
-- label: ":kubernetes: Hello World!"
-  command: echo Hello World!
-  agents:
-    queue: kubernetes
+  - label: ":kubernetes: Deploy nginx web app"
+    command: |
+      echo "--- :kubernetes: Deploying nginx web app to Kubernetes"
+      
+      # Apply the Kubernetes manifests
+      kubectl apply -f k8s/namespace.yaml
+      kubectl apply -f k8s/deployment.yaml
+      kubectl apply -f k8s/service.yaml
+      kubectl apply -f k8s/ingress.yaml
+      
+      echo "--- :mag: Checking deployment status"
+      kubectl rollout status deployment/nginx-webapp -n nginx-app
+      
+      echo "--- :white_check_mark: Deployment completed"
+      kubectl get pods -n nginx-app
+      kubectl get services -n nginx-app
+      
+    agents:
+      queue: "kubernetes"
+    timeout_in_minutes: 10
+    
+  - label: ":test_tube: Health check"
+    command: |
+      echo "--- :stethoscope: Running health checks"
+      
+      # Wait for pods to be ready
+      kubectl wait --for=condition=ready pod -l app=nginx-webapp -n nginx-app --timeout=300s
+      
+      # Get service endpoint
+      SERVICE_IP=$(kubectl get service nginx-webapp-service -n nginx-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+      if [ -z "$SERVICE_IP" ]; then
+        SERVICE_IP=$(kubectl get service nginx-webapp-service -n nginx-app -o jsonpath='{.spec.clusterIP}')
+      fi
+      
+      echo "Service available at: $SERVICE_IP"
+      
+      # Test the service (assuming port-forward or direct access)
+      kubectl port-forward service/nginx-webapp-service 8080:80 -n nginx-app &
+      PORT_FORWARD_PID=$!
+      sleep 5
+      
+      # Health check
+      if curl -f http://localhost:8080/health; then
+        echo ":white_check_mark: Health check passed"
+      else
+        echo ":x: Health check failed"
+        exit 1
+      fi
+      
+      kill $PORT_FORWARD_PID
+      
+    agents:
+      queue: "kubernetes"
+    depends_on: 
+      - step: ":kubernetes: Deploy nginx web app"
+    timeout_in_minutes: 5
