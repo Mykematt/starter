@@ -13,18 +13,7 @@ steps:
           exit_status: 128
     agents:
       queue: "default"
-    commands:
-      - |
-        if [ -n "$BUILDKITE_LABEL" ]; then
-          buildkite-agent meta-data set "$BUILDKITE_LABEL" "true"
-        fi
-      - "export PS4='$'"
-      - "echo 'steps:' > dynamic-pipeline.yml"
-      - "echo '  - label: Dynamic Step Success' >> dynamic-pipeline.yml"
-      - "echo '    command: echo Hello from generated pipeline' >> dynamic-pipeline.yml"
-      - "echo '  - label: Dynamic Step Failure' >> dynamic-pipeline.yml"
-      - "echo '    command: exit 1' >> dynamic-pipeline.yml"
-      - "buildkite-agent pipeline upload dynamic-pipeline.yml"
+    command: "exit 1"
 notify:
   - if: "build.state == \"failed\""
     slack:
