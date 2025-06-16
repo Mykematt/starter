@@ -1,22 +1,43 @@
 steps:
-  - env:
-      BUILD_JOB_PROJECT: "myproject"
-    key: "execute_build_units_Generate-pipeline-e7e1"
+  - commands:
+      - |
+        if [ -n "$BUILDKITE_LABEL" ]; then
+          buildkite-agent meta-data set "$BUILDKITE_LABEL" "true"
+        fi
+      - "export PS4='$'"
+      - "echo 'steps:' > dynamic-pipeline.yml"
+      - "echo '  - label: Success Step' >> dynamic-pipeline.yml"
+      - "echo '    command: echo This step will succeed' >> dynamic-pipeline.yml"
+      - "echo '    key: success-step' >> dynamic-pipeline.yml"
+      - "echo '' >> dynamic-pipeline.yml"
+      - "echo '  - label: Generate More Steps' >> dynamic-pipeline.yml"
+      - "echo '    command: |' >> dynamic-pipeline.yml"
+      - "echo '      echo \"steps:\" > nested-pipeline.yml' >> dynamic-pipeline.yml"
+      - "echo '      echo \"  - label: Nested Success\" >> nested-pipeline.yml' >> dynamic-pipeline.yml"
+      - "echo '      echo \"    command: echo Nested step succeeds\" >> nested-pipeline.yml' >> dynamic-pipeline.yml"
+      - "echo '      echo \"  - label: Failing Step\" >> nested-pipeline.yml' >> dynamic-pipeline.yml"
+      - "echo '      echo \"    command: exit 1\" >> nested-pipeline.yml' >> dynamic-pipeline.yml"
+      - "echo '      buildkite-agent pipeline upload nested-pipeline.yml' >> dynamic-pipeline.yml"
+      - "echo '    depends_on: success-step' >> dynamic-pipeline.yml"
+      - "echo '    key: generator-step' >> dynamic-pipeline.yml"
+      - "buildkite-agent pipeline upload dynamic-pipeline.yml"
     label: "Generate pipeline"
+    key: "execute_build_units_Generate-pipeline-e7e1"
     retry:
       automatic:
-        - limit: 2
-          exit_status: -1
-        - limit: 2
-          exit_status: 255
-        - limit: 2
-          exit_status: 128
+        - exit_status: -1
+          limit: 2
+        - exit_status: 255
+          limit: 2
+        - exit_status: 128
+          limit: 2
     agents:
       queue: "default"
-    command: "exit 1"
+    env:
+      BUILD_JOB_PROJECT: "myproject"
     notify:
-      - if: "build.state == \"failed\""
-        slack:
-          message: "Build failure: Pipeline Generation"
+      - slack:
           channels:
             - "#all-testing"
+          message: "Build failure: Pipeline Generation"
+        if: build.state == "failed"
