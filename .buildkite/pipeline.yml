@@ -1,43 +1,33 @@
 steps:
-  - commands:
+  - env:
+      BUILD_JOB_PROJECT: "myproject"
+    key: "execute_build_units_Generate-pipeline-e7e1"
+    label: "Generate pipeline"
+    retry:
+      automatic:
+        - limit: 2
+          exit_status: -1
+        - limit: 2
+          exit_status: 255
+        - limit: 2
+          exit_status: 128
+    agents:
+      queue: "default"
+    commands:
       - |
         if [ -n "$BUILDKITE_LABEL" ]; then
           buildkite-agent meta-data set "$BUILDKITE_LABEL" "true"
         fi
       - "export PS4='$'"
       - "echo 'steps:' > dynamic-pipeline.yml"
-      - "echo '  - label: Success Step' >> dynamic-pipeline.yml"
-      - "echo '    command: echo This step will succeed' >> dynamic-pipeline.yml"
-      - "echo '    key: success-step' >> dynamic-pipeline.yml"
-      - "echo '' >> dynamic-pipeline.yml"
-      - "echo '  - label: Generate More Steps' >> dynamic-pipeline.yml"
-      - "echo '    command: |' >> dynamic-pipeline.yml"
-      - "echo '      echo \"steps:\" > nested-pipeline.yml' >> dynamic-pipeline.yml"
-      - "echo '      echo \"  - label: Nested Success\" >> nested-pipeline.yml' >> dynamic-pipeline.yml"
-      - "echo '      echo \"    command: echo Nested step succeeds\" >> nested-pipeline.yml' >> dynamic-pipeline.yml"
-      - "echo '      echo \"  - label: Failing Step\" >> nested-pipeline.yml' >> dynamic-pipeline.yml"
-      - "echo '      echo \"    command: exit 1\" >> nested-pipeline.yml' >> dynamic-pipeline.yml"
-      - "echo '      buildkite-agent pipeline upload nested-pipeline.yml' >> dynamic-pipeline.yml"
-      - "echo '    depends_on: success-step' >> dynamic-pipeline.yml"
-      - "echo '    key: generator-step' >> dynamic-pipeline.yml"
+      - "echo '  - label: Dynamic Step Success' >> dynamic-pipeline.yml"
+      - "echo '    command: echo Hello from generated pipeline' >> dynamic-pipeline.yml"
+      - "echo '  - label: Dynamic Step Failure' >> dynamic-pipeline.yml"
+      - "echo '    command: exit 1' >> dynamic-pipeline.yml"
       - "buildkite-agent pipeline upload dynamic-pipeline.yml"
-    label: "Generate pipeline"
-    key: "execute_build_units_Generate-pipeline-e7e1"
-    retry:
-      automatic:
-        - exit_status: -1
-          limit: 2
-        - exit_status: 255
-          limit: 2
-        - exit_status: 128
-          limit: 2
-    agents:
-      queue: "default"
-    env:
-      BUILD_JOB_PROJECT: "myproject"
 notify:
-  - slack:
+  - if: "build.state == \"failed\""
+    slack:
+      message: "Build failure: Pipeline Generation"
       channels:
         - "#all-testing"
-      message: "Build failure: Pipeline Generation"
-    if: build.state == "failed"
