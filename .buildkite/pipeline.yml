@@ -14,9 +14,9 @@ steps:
     agents:
       queue: "default"
     command: "exit 1"
-notify:
-  - if: "build.state == \"failed\""
-    slack:
-      message: "Build failure: Pipeline Generation"
-      channels:
-        - "#all-testing"
+    notify:
+      - if: "build.state == \"failed\""
+        slack:
+          message: "Build failure: Pipeline Generation"
+          channels:
+            - "#all-testing"
