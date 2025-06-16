@@ -28,4 +28,4 @@ notify:
       channels:
         - "#all-testing"
       message: "Build failure: Pipeline Generation"
-      if: "build.state == \"failed\""
+    if: build.state == "failed"
