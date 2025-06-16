@@ -1,77 +1,29 @@
 steps:
-  - label: "deploy-nginx-web-app"
+  - label: "Test Build with Sections and Links"
     command: |
-      echo "--- Installing kubectl"
+      echo "--- :rocket: Starting build process"
+      echo "This is the main build step"
       
-      # Install kubectl if not present
-      if ! command -v kubectl &> /dev/null; then
-        echo "kubectl not found, installing..."
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        chmod +x kubectl
-        sudo mv kubectl /usr/local/bin/
-      fi
+      echo "--- :information_source: Build Information"
+      echo "Build number: ${BUILDKITE_BUILD_NUMBER}"
+      echo "Branch: ${BUILDKITE_BRANCH}"
+      echo "Repository: https://github.com/example/repo"
+      echo "Documentation: [Click here](https://docs.example.com)"
+      echo "HTML link attempt: <a href='https://buildkite.com'>Buildkite</a>"
       
-      # Verify kubectl installation
-      kubectl version --client
+      echo "--- :test_tube: Running Tests"
+      echo "Test results will appear here"
+      echo "View full report: https://reports.example.com/test-${BUILDKITE_BUILD_NUMBER}"
       
-      echo "--- Deploying nginx web app to Kubernetes"
-      
-      # Apply the Kubernetes manifests
-      kubectl apply -f k8s/namespace.yaml
-      kubectl apply -f k8s/deployment.yaml
-      kubectl apply -f k8s/service.yaml
-      kubectl apply -f k8s/ingress.yaml
-      
-      echo "--- Checking deployment status"
-      kubectl rollout status deployment/nginx-webapp -n nginx-app
-      
-      echo "--- Deployment completed"
-      kubectl get pods -n nginx-app
-      kubectl get services -n nginx-app
-      
-    agents:
-      queue: "kubernetes"
-    timeout_in_minutes: 10
+      echo "--- :white_check_mark: Build Complete"
+      echo "Artifacts available at: https://artifacts.example.com/build-${BUILDKITE_BUILD_NUMBER}"
+      echo "Markdown link: [Download artifacts](https://artifacts.example.com/build-${BUILDKITE_BUILD_NUMBER})"
+
+  - label: "Deploy"
+    command: |
+      echo "--- :rocket: Deployment"
+      echo "Deploying to staging..."
+      echo "View deployment: https://staging.example.com"
+      echo "Dashboard: [Staging Dashboard](https://dashboard.staging.example.com)"
     
-  - label: "health-check"
-    command: |
-      echo "--- Running health checks"
-      
-      # Ensure kubectl is available
-      if ! command -v kubectl &> /dev/null; then
-        echo "kubectl not found, installing..."
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        chmod +x kubectl
-        sudo mv kubectl /usr/local/bin/
-      fi
-      
-      # Wait for pods to be ready
-      kubectl wait --for=condition=ready pod -l app=nginx-webapp -n nginx-app --timeout=300s
-      
-      # Get service endpoint
-      SERVICE_IP=$(kubectl get service nginx-webapp-service -n nginx-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-      if [ -z "$SERVICE_IP" ]; then
-        SERVICE_IP=$(kubectl get service nginx-webapp-service -n nginx-app -o jsonpath='{.spec.clusterIP}')
-      fi
-      
-      echo "Service available at: $SERVICE_IP"
-      
-      # Test the service (assuming port-forward or direct access)
-      kubectl port-forward service/nginx-webapp-service 8080:80 -n nginx-app &
-      PORT_FORWARD_PID=$!
-      sleep 5
-      
-      # Health check
-      if curl -f http://localhost:8080/health; then
-        echo "Health check passed"
-      else
-        echo "Health check failed"
-        exit 1
-      fi
-      
-      kill $PORT_FORWARD_PID
-      
-    agents:
-      queue: "kubernetes"
-    depends_on: "deploy-nginx-web-app"
-    timeout_in_minutes: 5
+    depends_on: "test-build-with-sections-and-links"
