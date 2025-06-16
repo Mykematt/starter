@@ -1,5 +1,5 @@
 steps:
-  - command: echo "Hello World"
+  - command: exit code 0
     label: Generate pipeline
 notify:
   - slack:
