@@ -1,9 +1,9 @@
 steps:
-  - command: exit code 0
+  - command: echo "Hello World"
     label: Generate pipeline
 notify:
   - slack:
       channels:
         - '#all-testing'
-      message: 'Build failure: Pipeline Generation'
-    if: build.state == "failed"
+      message: 'Build success: Pipeline Generation'
+    if: build.state == "passed"
