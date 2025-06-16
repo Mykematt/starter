@@ -1,9 +1,9 @@
 steps:
-  - label: "Test Links in Sections"
-    command: |
-      echo "--- :rocket: Build Info"
-      printf '\e]8;;http://example.com\e\\This is a link\e]8;;\e\\\n'
-      printf 'Documentation: \e]8;;https://docs.buildkite.com\e\\Buildkite Docs\e]8;;\e\\\n'
-      
-      echo "--- :test_tube: Results"
-      printf 'View report: \e]8;;https://reports.example.com\e\\Test Results\e]8;;\e\\\n'
+  - command: echo "Hello World"
+    label: Generate pipeline
+notify:
+  - slack:
+      channels:
+        - '#all-testing'
+      message: 'Build failure: Pipeline Generation'
+      if: build.state == "failed"
