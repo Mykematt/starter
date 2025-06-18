@@ -1,15 +1,15 @@
 steps:
-  - label: "Simple wildcard download"
+  - label: "Step 1 - Main Task"
+    key: "step1"
     command: |
-      echo "Downloading all artifacts from known working build..."
-      
-      # Use your known working build ID
-      KNOWN_BUILD="01978480-cbba-4ee5-89a2-930febebc318"
-      
-      buildkite-agent artifact download "*" ./all-artifacts/ --build "$KNOWN_BUILD"
-      
-      echo "Downloaded files:"
-      find ./all-artifacts/ -type f -ls 2>/dev/null || echo "No files found"
-      
-      echo "File contents:"
-      find ./all-artifacts/ -type f -exec echo "=== {} ===" \; -exec cat {} \; 2>/dev/null
+      echo "Running main task"
+      # Your actual command here
+
+  - label: "Step 2 - Fallback Task"
+    key: "step2"
+    depends_on: 
+      - step: "step1"
+        allow_dependency_failure: true
+    if: build.jobs.step1.state == "failed"
+    command: |
+      echo "Step 1 failed, running fallback"
