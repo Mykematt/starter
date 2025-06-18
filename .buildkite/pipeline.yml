@@ -1,27 +1,16 @@
 steps:
-  - label: "Find latest artifact anywhere"
+  - label: "Download all unknown artifacts"
     command: |
-      echo "Searching for latest 'test-data.txt' across all pipelines..."
-      
       ORG_SLUG="olabuildkite"
+      GENERATOR_PIPELINE="plugin"
       
-      # Search across all recent builds in the organization
-      LATEST_BUILD_WITH_ARTIFACT=$(buildkite-agent api get "/v2/organizations/$ORG_SLUG/builds?state=passed&per_page=50" | \
-        jq -r '.[] | select(.artifacts_url != null) | .id' | \
-        while read build_id; do
-          # Check if this build has our artifact
-          if buildkite-agent artifact download "test-data.txt" /tmp/check --build "$build_id" 2>/dev/null; then
-            echo "$build_id"
-            rm -f /tmp/check/test-data.txt
-            break
-          fi
-        done)
+      # Get latest build
+      LATEST_BUILD=$$(buildkite-agent api get "/v2/organizations/$$ORG_SLUG/pipelines/$$GENERATOR_PIPELINE/builds?state=passed&per_page=1" | jq -r '.[0].id')
       
-      if [ -n "$LATEST_BUILD_WITH_ARTIFACT" ]; then
-        echo "Found latest build with artifact: $LATEST_BUILD_WITH_ARTIFACT"
-        buildkite-agent artifact download "test-data.txt" . --build "$LATEST_BUILD_WITH_ARTIFACT"
-        cat test-data.txt
-      else
-        echo "❌ No builds found with test-data.txt artifact"
-        exit 1
-      fi
+      echo "Downloading ALL artifacts from build: $$LATEST_BUILD"
+      
+      # Download everything
+      buildkite-agent artifact download "*" ./downloaded/ --build "$$LATEST_BUILD"
+      
+      echo "What did we get?"
+      find ./downloaded/ -type f -exec echo "📁 {}" \; -exec head -3 {} \; -exec echo "---" \;
