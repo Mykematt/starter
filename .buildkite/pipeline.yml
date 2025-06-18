@@ -1,3 +1,6 @@
+agents:
+      queue: "mac"
+
 steps:
   - label: "Step 1 - Main Task"
     key: "step1"
