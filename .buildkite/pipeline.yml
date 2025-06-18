@@ -6,10 +6,10 @@ steps:
       # Replace BUILD_UUID_HERE with the actual build UUID from Pipeline 1
       BUILD_UUID="01978480-cbba-4ee5-89a2-930febebc318"
       
-      echo "Attempting to download from build: $BUILD_UUID"
+      echo "Attempting to download from build: $$BUILD_UUID"
       
       # Download the artifact
-      buildkite-agent artifact download "test-data.txt" . --build "$BUILD_UUID"
+      buildkite-agent artifact download "test-data.txt" . --build "$$BUILD_UUID"
       
       # Verify download
       if [ -f "test-data.txt" ]; then
@@ -20,9 +20,9 @@ steps:
         # Use the data (example processing)
         echo ""
         echo "Processing the downloaded data..."
-        ORIGINAL_BUILD=$(grep "Build ID:" test-data.txt | cut -d' ' -f3)
-        echo "Data originally from build: $ORIGINAL_BUILD"
-        echo "Current consuming build: $BUILDKITE_BUILD_ID"
+        ORIGINAL_BUILD=$$(grep "Build ID:" test-data.txt | cut -d' ' -f3)
+        echo "Data originally from build: $$ORIGINAL_BUILD"
+        echo "Current consuming build: $$BUILDKITE_BUILD_ID"
         
       else
         echo "❌ Artifact download failed"
