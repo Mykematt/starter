@@ -12,7 +12,7 @@ steps:
     key: "step2"
     depends_on: 
       - step: "step1"
-        allow_dependency_failure: "true"
+    allow_dependency_failure: "true"
     if: build.jobs.step1.state == "failed"
     command: |
       echo "Step 1 failed, running fallback"
