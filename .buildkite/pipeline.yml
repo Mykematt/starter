@@ -6,13 +6,20 @@ steps:
     key: "step1"
     command: |
       echo "Running main task"
-      # Your actual command here
+      # Your actual command here that might fail
 
-  - label: "Step 2 - Fallback Task"
-    key: "step2"
-    depends_on: 
-      - step: "step1"
-    allow_dependency_failure: "true"
-    if: build.jobs.step1.state == "failed"
+  - wait
+
+  - label: "Check Step 1 and Upload Conditional Step"
     command: |
-      echo "Step 1 failed, running fallback"
+      if [ "$(buildkite-agent step get "outcome" --step "step1")" == "failed" ] || [ "$(buildkite-agent step get "outcome" --step "step1")" == "hard_failed" ]; then
+        cat <<- YAML | buildkite-agent pipeline upload
+      steps:
+        - label: "Step 2 - Fallback Task"
+          command: |
+            echo "Step 1 failed, running fallback"
+            # Your fallback logic here
+      YAML
+      else
+        echo "Step 1 succeeded, skipping fallback step"
+      fi
