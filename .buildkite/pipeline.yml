@@ -1,30 +1,27 @@
 steps:
-  - label: "Download and use artifact"
+  - label: "Find latest artifact anywhere"
     command: |
-      echo "Downloading artifact from other pipeline..."
+      echo "Searching for latest 'test-data.txt' across all pipelines..."
       
-      # Replace BUILD_UUID_HERE with the actual build UUID from Pipeline 1
-      BUILD_UUID="01978480-cbba-4ee5-89a2-930febebc318"
+      ORG_SLUG="olabuildkite"
       
-      echo "Attempting to download from build: $$BUILD_UUID"
+      # Search across all recent builds in the organization
+      LATEST_BUILD_WITH_ARTIFACT=$(buildkite-agent api get "/v2/organizations/$ORG_SLUG/builds?state=passed&per_page=50" | \
+        jq -r '.[] | select(.artifacts_url != null) | .id' | \
+        while read build_id; do
+          # Check if this build has our artifact
+          if buildkite-agent artifact download "test-data.txt" /tmp/check --build "$build_id" 2>/dev/null; then
+            echo "$build_id"
+            rm -f /tmp/check/test-data.txt
+            break
+          fi
+        done)
       
-      # Download the artifact
-      buildkite-agent artifact download "test-data.txt" . --build "$$BUILD_UUID"
-      
-      # Verify download
-      if [ -f "test-data.txt" ]; then
-        echo "✅ Artifact downloaded successfully!"
-        echo "File contents:"
+      if [ -n "$LATEST_BUILD_WITH_ARTIFACT" ]; then
+        echo "Found latest build with artifact: $LATEST_BUILD_WITH_ARTIFACT"
+        buildkite-agent artifact download "test-data.txt" . --build "$LATEST_BUILD_WITH_ARTIFACT"
         cat test-data.txt
-        
-        # Use the data (example processing)
-        echo ""
-        echo "Processing the downloaded data..."
-        ORIGINAL_BUILD=$$(grep "Build ID:" test-data.txt | cut -d' ' -f3)
-        echo "Data originally from build: $$ORIGINAL_BUILD"
-        echo "Current consuming build: $$BUILDKITE_BUILD_ID"
-        
       else
-        echo "❌ Artifact download failed"
+        echo "❌ No builds found with test-data.txt artifact"
         exit 1
       fi
