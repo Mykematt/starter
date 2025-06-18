@@ -1,16 +1,15 @@
 steps:
-  - label: "Download all unknown artifacts"
+  - label: "Simple wildcard download"
     command: |
-      ORG_SLUG="olabuildkite"
-      GENERATOR_PIPELINE="plugin"
+      echo "Downloading all artifacts from known working build..."
       
-      # Get latest build
-      LATEST_BUILD=$$(buildkite-agent api get "/v2/organizations/$$ORG_SLUG/pipelines/$$GENERATOR_PIPELINE/builds?state=passed&per_page=1" | jq -r '.[0].id')
+      # Use your known working build ID
+      KNOWN_BUILD="01978480-cbba-4ee5-89a2-930febebc318"
       
-      echo "Downloading ALL artifacts from build: $$LATEST_BUILD"
+      buildkite-agent artifact download "*" ./all-artifacts/ --build "$KNOWN_BUILD"
       
-      # Download everything
-      buildkite-agent artifact download "*" ./downloaded/ --build "$$LATEST_BUILD"
+      echo "Downloaded files:"
+      find ./all-artifacts/ -type f -ls 2>/dev/null || echo "No files found"
       
-      echo "What did we get?"
-      find ./downloaded/ -type f -exec echo "📁 {}" \; -exec head -3 {} \; -exec echo "---" \;
+      echo "File contents:"
+      find ./all-artifacts/ -type f -exec echo "=== {} ===" \; -exec cat {} \; 2>/dev/null
