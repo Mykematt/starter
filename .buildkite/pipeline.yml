@@ -2,23 +2,25 @@ agents:
       queue: "mac"
 
 steps:
-  - label: "Step 1 - Main Task"
+  - label: "Step 1 - Main Task (Will Fail)"
     key: "step1"
     command: |
       echo "Running main task"
-      # Your actual command here that might fail
+      echo "This step will fail for testing"
+      exit 1  # Force failure
 
   - wait
 
   - label: "Check Step 1 and Upload Conditional Step"
     command: |
       if [ "$(buildkite-agent step get "outcome" --step "step1")" == "failed" ] || [ "$(buildkite-agent step get "outcome" --step "step1")" == "hard_failed" ]; then
+        echo "Step 1 failed! Uploading fallback step..."
         cat <<- YAML | buildkite-agent pipeline upload
       steps:
         - label: "Step 2 - Fallback Task"
           command: |
-            echo "Step 1 failed, running fallback"
-            # Your fallback logic here
+            echo "✅ Step 1 failed, running fallback as expected!"
+            echo "This confirms the conditional logic is working"
       YAML
       else
         echo "Step 1 succeeded, skipping fallback step"
