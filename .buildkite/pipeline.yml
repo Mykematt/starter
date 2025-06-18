@@ -1,21 +1,30 @@
 steps:
-  - label: "Generate test file"
+  - label: "Download and use artifact"
     command: |
-      echo "Creating test data file..."
+      echo "Downloading artifact from other pipeline..."
       
-      # Create a test file with some data
-      echo "Build ID: $BUILDKITE_BUILD_ID" > test-data.txt
-      echo "Build Number: $BUILDKITE_BUILD_NUMBER" >> test-data.txt
-      echo "Pipeline: $BUILDKITE_PIPELINE_SLUG" >> test-data.txt
-      echo "Generated at: $(date)" >> test-data.txt
-      echo "Some test data for cross-pipeline usage" >> test-data.txt
+      # Replace BUILD_UUID_HERE with the actual build UUID from Pipeline 1
+      BUILD_UUID="01978480-cbba-4ee5-89a2-930febebc318"
       
-      # Show what we created
-      echo "Generated file contents:"
-      cat test-data.txt
+      echo "Attempting to download from build: $BUILD_UUID"
       
-      # Upload as artifact
-      buildkite-agent artifact upload "test-data.txt"
+      # Download the artifact
+      buildkite-agent artifact download "test-data.txt" . --build "$BUILD_UUID"
       
-      echo "✅ Artifact uploaded successfully"
-      echo "Build UUID: $BUILDKITE_BUILD_ID"
+      # Verify download
+      if [ -f "test-data.txt" ]; then
+        echo "✅ Artifact downloaded successfully!"
+        echo "File contents:"
+        cat test-data.txt
+        
+        # Use the data (example processing)
+        echo ""
+        echo "Processing the downloaded data..."
+        ORIGINAL_BUILD=$(grep "Build ID:" test-data.txt | cut -d' ' -f3)
+        echo "Data originally from build: $ORIGINAL_BUILD"
+        echo "Current consuming build: $BUILDKITE_BUILD_ID"
+        
+      else
+        echo "❌ Artifact download failed"
+        exit 1
+      fi
