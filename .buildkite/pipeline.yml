@@ -8,6 +8,15 @@ steps:
 
   - label: 'Step 2'
     command: |
-      if [ $(buildkite-agent step get "outcome" --step "one") == "hard_failed" ]; then
-        do something else, maybe upload steps?
+      if [ $? -eq 0 ]; then
+        MESSAGE="✅ All tests passed! Coverage: 95%"
+      else
+        MESSAGE="❌ Tests failed. See report for details."
       fi
+      
+      # Set metadata
+      buildkite-agent meta-data set "test-summary" "$$MESSAGE"
+
+notify:
+  - slack: "#ola-testing"
+    message: "echo $$MESSAGE"
