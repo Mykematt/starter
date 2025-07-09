@@ -1,5 +1,5 @@
 agents:
-  - queue: "mac"
+  queue: "mac"
   
 steps:
   - label: 'Step 1'
