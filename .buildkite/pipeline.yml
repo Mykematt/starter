@@ -1,3 +1,6 @@
+agents:
+  - queue: "mac"
+  
 steps:
   - label: 'Step 1'
     key: 'step1'
@@ -18,7 +21,7 @@ steps:
       fi
       
       # Set metadata
-      buildkite-agent meta-data set "test-summary" "$MESSAGE"
+      buildkite-agent meta-data set "test-summary" "$$MESSAGE"
 
 notify:
   - slack:
