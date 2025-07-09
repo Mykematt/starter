@@ -14,7 +14,7 @@ steps:
       # Check the state of the previous step using Buildkite's API
       STEP1_STATE=$(buildkite-agent step get "outcome" --step "step1")
       
-      if [ "$STEP1_STATE" = "passed" ]; then
+      if [ "$$STEP1_STATE" = "passed" ]; then
         MESSAGE="✅ All tests passed! Coverage: 95%"
       else
         MESSAGE="❌ Tests failed. See report for details."
