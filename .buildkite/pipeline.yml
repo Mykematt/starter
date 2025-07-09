@@ -26,7 +26,7 @@ steps:
 notify:
   - slack:
       channels:
-        - "#ola-testing"
+        - "buildkite#ola-testing"
       message: |
         Build #{{build.number}} on {{build.branch}}
         {{build.meta_data.test-summary}}
