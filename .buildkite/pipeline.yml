@@ -1,22 +1,29 @@
 steps:
   - label: 'Step 1'
+    key: 'step1'
     command: "false"
-    key: 'one'
-
+    
   - wait:
     continue_on_failure: true
-
+    
   - label: 'Step 2'
     command: |
-      if [ $? -eq 0 ]; then
+      # Check the state of the previous step using Buildkite's API
+      STEP1_STATE=$(buildkite-agent step get "outcome" --step "step1")
+      
+      if [ "$STEP1_STATE" = "passed" ]; then
         MESSAGE="✅ All tests passed! Coverage: 95%"
       else
         MESSAGE="❌ Tests failed. See report for details."
       fi
       
       # Set metadata
-      buildkite-agent meta-data set "test-summary" "$$MESSAGE"
+      buildkite-agent meta-data set "test-summary" "$MESSAGE"
 
 notify:
-  - slack: "#ola-testing"
-      message: "echo $$MESSAGE"
+  - slack:
+      channels:
+        - "#ola-testing"
+      message: |
+        Build #{{build.number}} on {{build.branch}}
+        {{build.meta_data.test-summary}}
