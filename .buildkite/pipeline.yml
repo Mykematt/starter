@@ -4,12 +4,10 @@ agents:
 steps:
   - label: 'Step 1'
     key: 'step1'
-    command: "false"
-    
-  - wait:
-    continue_on_failure: true
+    command: "passed"
     
   - label: 'Step 2'
+    depends_on: 'step1'
     command: |
       # Check the state of the previous step using Buildkite's API
       STEP1_STATE=$(buildkite-agent step get "outcome" --step "step1")
@@ -19,6 +17,8 @@ steps:
       else
         MESSAGE="❌ Tests failed. See report for details."
       fi
+
+      echo $$MESSAGE
       
       # Set metadata
       buildkite-agent meta-data set "test-summary" "$$MESSAGE"
