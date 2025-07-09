@@ -4,7 +4,7 @@ agents:
 steps:
   - label: 'Step 1'
     key: 'step1'
-    command: "passed"
+    command: "echo ..."
     
   - label: 'Step 2'
     depends_on: 'step1'
