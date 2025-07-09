@@ -19,4 +19,4 @@ steps:
 
 notify:
   - slack: "#ola-testing"
-    message: "echo $$MESSAGE"
+      message: "echo $$MESSAGE"
