@@ -1,3 +1,5 @@
+agents:
+  queue: "mac"
 steps:
   # Step 1: Uses the default pipeline repo (no plugin needed)
   - label: "Step 1: Pipeline repo"
