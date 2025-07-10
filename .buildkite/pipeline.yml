@@ -15,4 +15,4 @@ steps:
     plugins:
       - git-ssh-checkout#v0.4.1:
           repository-url: "git@github.com:Mykematt/k8s-test.git"
-          ssh-secret-key-name: "DEPLOYMENT_SSH_KEY"
+          ssh-secret-key-name: "GIT_SSH_CHECKOUT_PLUGIN_SSH_KEY"
