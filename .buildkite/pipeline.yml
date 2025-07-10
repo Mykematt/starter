@@ -2,31 +2,20 @@ agents:
   queue: "mac"
   
 steps:
-  - label: 'Step 1'
-    key: 'step1'
-    command: "echo ..."
-    
-  - label: 'Step 2'
-    depends_on: 'step1'
+  # Step 1: Uses the default pipeline repo (no plugin needed)
+  - label: "Step 1: Pipeline repo"
     command: |
-      # Check the state of the previous step using Buildkite's API
-      STEP1_STATE=$(buildkite-agent step get "outcome" --step "step1")
-      
-      if [ "$$STEP1_STATE" = "passed" ]; then
-        MESSAGE="✅ All tests passed! Coverage: 95%"
-      else
-        MESSAGE="❌ Tests failed. See report for details."
-      fi
+      echo "This step checked out the pipeline repo"
+      echo "Current directory: $(pwd)"
+      echo "Repository: $BUILDKITE_REPO"
 
-      echo $$MESSAGE
-      
-      # Set metadata
-      buildkite-agent meta-data set "test-summary" "$$MESSAGE"
-
-notify:
-  - slack:
-      channels:
-        - "olabuildkite#all-olabuildkite"
-      message: |
-        Build #{{build.number}} on {{build.branch}}
-        {{build.meta_data.test-summary}}
+  # Step 2: Uses the plugin to checkout your k8s-test repo
+  - label: "Step 2: k8s-test repo"
+    command: |
+      echo "This step checked out the k8s-test repo"
+      echo "Current directory: $(pwd)"
+      echo "Repository: git@github.com:Mykematt/k8s-test.git"
+    plugins:
+      - git-ssh-checkout#v1.0.0:
+          repository-url: "git@github.com:Mykematt/k8s-test.git"
+          ssh-secret-key-name: "DEPLOYMENT_SSH_KEY"
