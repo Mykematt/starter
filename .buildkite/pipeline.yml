@@ -14,7 +14,6 @@ steps:
     command: |
       echo "This step checked out the k8s-test repo"
       echo "Current directory: $(pwd)"
-      echo "Repository: git@github.com:Mykematt/k8s-test.git"
     plugins:
       - git-ssh-checkout#v0.4.1:
           repository-url: "git@github.com:Mykematt/k8s-test.git"
