@@ -13,6 +13,6 @@ steps:
       echo "This step checked out the k8s-test repo"
       echo "Current directory: $(pwd)"
     plugins:
-      - git-ssh-checkout#v1.4.0:
+      - git-ssh-checkout#v1.0.0:
           repository-url: "git@github.com:Mykematt/k8s-test.git"
           ssh-secret-key-name: "DEPLOYMENT_SSH_KEY"
