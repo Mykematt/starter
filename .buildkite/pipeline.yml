@@ -12,7 +12,10 @@ steps:
     command: |
       echo "This step checked out the k8s-test repo"
       echo "Current directory: $(pwd)"
+      
     plugins:
       - git-ssh-checkout#v0.4.1:
           repository-url: "git@github.com:Mykematt/k8s-test.git"
           ssh-secret-key-name: "GIT_SSH_CHECKOUT_PLUGIN_SSH_KEY"
+          checkout-path: ./k8s-test  # Different path!
+
