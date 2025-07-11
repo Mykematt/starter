@@ -7,9 +7,6 @@ steps:
 
   # Step 3: SonarCloud Analysis
   - label: "🔍 SonarCloud Analysis"
-    command: |
-      echo "Debug: SONAR_TOKEN length: $${#SONAR_TOKEN}"
-      echo "Debug: SONAR_TOKEN starts with: $${SONAR_TOKEN:0:10}..."
     plugins:
       - seek-oss/aws-sm#v2.3.3:
           env:
