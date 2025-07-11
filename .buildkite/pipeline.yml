@@ -22,5 +22,7 @@ steps:
           environment:
             - "SONAR_TOKEN"
           propagate-environment: true
-          user: "1000"
+          volumes:
+            - ".:/usr/src"
+          workdir: "/usr/src"
 
