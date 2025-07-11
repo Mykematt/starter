@@ -22,4 +22,5 @@ steps:
           environment:
             - "SONAR_TOKEN"
           propagate-environment: true
+          user: "$(id -u):$(id -g)"
 
