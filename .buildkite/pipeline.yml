@@ -8,8 +8,6 @@ steps:
   # Step 3: SonarCloud Analysis
   - label: "🔍 SonarCloud Analysis"
     command: |
-      echo "Debug: SONAR_TOKEN length: $${#SONAR_TOKEN}"
-      echo "Debug: SONAR_TOKEN starts with: $${SONAR_TOKEN:0:10}..."
       sonar-scanner
     env:
       SONAR_HOST_URL: "https://sonarcloud.io"
@@ -25,5 +23,5 @@ steps:
           volumes:
             - ".:/usr/src"
           workdir: "/usr/src"
-          user: "$(id -u):$(id -g)"
+          user: "999:999"
 
