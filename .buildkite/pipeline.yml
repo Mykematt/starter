@@ -8,8 +8,8 @@ steps:
   # Step 3: SonarCloud Analysis
   - label: "🔍 SonarCloud Analysis"
     command: |
-      echo "Debug: SONAR_TOKEN length: $${#SONAR_TOKEN}"
-      echo "Debug: SONAR_TOKEN starts with: $${SONAR_TOKEN:0:10}..."
+      mkdir -p .scannerwork
+      chmod 777 .scannerwork
       sonar-scanner
     env:
       SONAR_HOST_URL: "https://sonarcloud.io"
