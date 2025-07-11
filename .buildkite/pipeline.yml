@@ -11,6 +11,7 @@ steps:
       sonar-scanner
     env:
       SONAR_HOST_URL: "https://sonarcloud.io"
+      SONAR_USER_HOME: "/tmp"
     plugins:
       - seek-oss/aws-sm#v2.3.3:
           env:
