@@ -8,8 +8,8 @@ steps:
   # Step 3: SonarCloud Analysis
   - label: "🔍 SonarCloud Analysis"
     command: |
-      mkdir -p .scannerwork
-      chmod 777 .scannerwork
+      echo "Debug: SONAR_TOKEN length: $${#SONAR_TOKEN}"
+      echo "Debug: SONAR_TOKEN starts with: $${SONAR_TOKEN:0:10}..."
       sonar-scanner
     env:
       SONAR_HOST_URL: "https://sonarcloud.io"
@@ -25,4 +25,5 @@ steps:
           volumes:
             - ".:/usr/src"
           workdir: "/usr/src"
+          user: "$(id -u):$(id -g)"
 
