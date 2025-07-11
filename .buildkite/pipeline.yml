@@ -15,5 +15,7 @@ steps:
             SONAR_TOKEN: ola/sonar-token
       - docker#v5.11.0:
           image: "sonarsource/sonar-scanner-cli:latest"
+          environment:
+            - "SONAR_TOKEN"
           propagate-environment: true
 
