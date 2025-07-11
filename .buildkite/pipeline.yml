@@ -5,16 +5,13 @@ steps:
       echo "This step checked out the pipeline repo"
       echo "Current directory: $(pwd)"
 
-  # Step 3: SonarCloud Analysis
+  # Step 3: SonarCloud Analysis (Native Binary)
   - label: "🔍 SonarCloud Analysis"
+    command: |
+      sonar-scanner
     plugins:
       - seek-oss/aws-sm#v2.3.3:
           env:
             SONAR_TOKEN: ola/sonar-token
-      - docker#v5.11.0:
-          image: "sonarsource/sonar-scanner-cli:latest"
-          environment:
-            - "SONAR_TOKEN"
-          propagate-environment: true
 
 
