@@ -8,13 +8,6 @@ steps:
   # Step 3: SonarCloud Analysis (Native Binary)
   - label: "🔍 SonarCloud Analysis"
     command: |
-      echo "=== DEBUG INFO ==="
-      whoami
-      echo "PATH: $PATH"
-      echo "HOME: $HOME"
-      ls -la /opt/sonar-scanner/bin/sonar-scanner || echo "File does not exist"
-      which sonar-scanner || echo "Not in PATH"
-      echo "=== TRYING DIRECT PATH ==="
       /opt/sonar-scanner/bin/sonar-scanner 
     plugins:
       - seek-oss/aws-sm#v2.3.3:
