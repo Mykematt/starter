@@ -8,7 +8,7 @@ steps:
   # Step 3: SonarCloud Analysis (Native Binary)
   - label: "🔍 SonarCloud Analysis"
     command: |
-      /opt/sonar-scanner/bin/sonar-scanner
+      /opt/sonar-scanner/bin/sonar-scanner 
     plugins:
       - seek-oss/aws-sm#v2.3.3:
           env:
