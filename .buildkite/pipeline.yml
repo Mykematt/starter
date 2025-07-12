@@ -8,6 +8,16 @@ steps:
   # Step 3: SonarCloud Analysis (Native Binary)
   - label: "🔍 SonarCloud Analysis"
     command: |
+      # Wait for sonar-scanner installation to complete (up to 1 minute)
+      echo "⏳ Waiting for sonar-scanner installation..."
+      timeout 60 bash -c 'while [[ ! -x "/opt/sonar-scanner/bin/sonar-scanner" ]]; do echo "Still waiting..."; sleep 5; done' || { echo "❌ Timeout: sonar-scanner not found after 1 minute"; exit 1; }
+      
+      # Verify installation
+      echo "✅ sonar-scanner found! Version:"
+      /opt/sonar-scanner/bin/sonar-scanner --version
+      
+      # Run analysis
+      echo "🔍 Starting SonarCloud analysis..."
       /opt/sonar-scanner/bin/sonar-scanner 
     plugins:
       - seek-oss/aws-sm#v2.3.3:
