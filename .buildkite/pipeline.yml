@@ -4,19 +4,21 @@ steps:
     concurrency: 1
     concurrency_group: test-gate-1
     concurrency_method: eager
-
-  - wait
-
-  - label: "💤 Sleep 10s (inside gate)"
-    command: 'echo "Sleeping at $(date +%H:%M:%S)" && sleep 10'
-
-  - wait
-
-  - label: "🔴 End Gate-1"
-    command: 'echo "Closing gate-1 at $(date +%H:%M:%S)"'
-    concurrency: 1
-    concurrency_group: test-gate-1
-    concurrency_method: eager
-
-  - label: "✅ After gate"
-    command: 'echo "Completed at $(date +%H:%M:%S)"'
+  
+  - label: "📤 Upload rest of pipeline"
+    command: |
+      cat <<EOF | buildkite-agent pipeline upload
+      steps:
+        - label: "💤 Sleep 10s (inside gate)"
+          command: 'echo "Sleeping at \$(date +%H:%M:%S)" && sleep 10'
+        
+        - wait
+        
+        - label: "🔴 End Gate-1"
+          command: 'echo "Closing gate-1 at \$(date +%H:%M:%S)"'
+          concurrency: 1
+          concurrency_group: test-gate-1
+          concurrency_method: eager
+        
+        - label: "✅ After gate"
+          command: 'echo "Completed at \$(date +%H:%M:%S)"'
