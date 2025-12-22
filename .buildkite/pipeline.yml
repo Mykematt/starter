@@ -1,21 +1,22 @@
 steps:
-  # Step 1: Uses the default pipeline repo (no plugin needed)
-  - label: "Step 1: Pipeline repo"
-    command: |
-      echo "This step checked out the pipeline repo"
-      echo "Current directory: $(pwd)"
+  - label: "🟢 Start Gate-1"
+    command: 'echo "Opening gate-1 at $(date +%H:%M:%S)"'
+    concurrency: 1
+    concurrency_group: test-gate-1
+    concurrency_method: eager
 
-  # Step 3: SonarCloud Analysis (Native Binary)
-  - label: "🔍 SonarCloud Analysis"
-    command: |
-      # Wait for installation (typically ~25s) - clean optimized version
-      echo "⏳ Waiting for sonar-scanner installation..."
-      timeout 30 bash -c 'while [[ ! -x "/opt/sonar-scanner/bin/sonar-scanner" ]]; do sleep 5; done'
-      echo "🔍 Starting SonarCloud analysis..."
-      /opt/sonar-scanner/bin/sonar-scanner 
-    plugins:
-      - seek-oss/aws-sm#v2.3.3:
-          env:
-            SONAR_TOKEN: ola/sonar-token
+  - wait
 
+  - label: "💤 Sleep 10s (inside gate)"
+    command: 'echo "Sleeping at $(date +%H:%M:%S)" && sleep 10'
 
+  - wait
+
+  - label: "🔴 End Gate-1"
+    command: 'echo "Closing gate-1 at $(date +%H:%M:%S)"'
+    concurrency: 1
+    concurrency_group: test-gate-1
+    concurrency_method: eager
+
+  - label: "✅ After gate"
+    command: 'echo "Completed at $(date +%H:%M:%S)"'
