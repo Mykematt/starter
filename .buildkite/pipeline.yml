@@ -11,6 +11,9 @@ steps:
       steps:
         - label: "💤 Sleep 10s (inside gate)"
           command: 'echo "Sleeping at \$(date +%H:%M:%S)" && sleep 10'
+          concurrency: 1
+          concurrency_group: test-gate-1
+          concurrency_method: eager
         
         - wait
         
@@ -22,3 +25,4 @@ steps:
         
         - label: "✅ After gate"
           command: 'echo "Completed at \$(date +%H:%M:%S)"'
+      EOF
