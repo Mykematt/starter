@@ -1,28 +1,36 @@
 steps:
-  - label: "🟢 Start Gate-1"
-    command: 'echo "Opening gate-1 at $(date +%H:%M:%S)"'
-    concurrency: 1
-    concurrency_group: test-gate-1
-    concurrency_method: eager
-  
-  - label: "📤 Upload rest of pipeline"
+  - label: "🔧 Generate conditional pipeline"
     command: |
-      cat <<EOF | buildkite-agent pipeline upload
+      echo "FORCE_BUILD is set to: ${FORCE_BUILD:-not set}"
+      
+      if [ "$FORCE_BUILD" = "1" ]; then
+        echo "🚀 Force build mode - running all steps"
+        cat <<EOF | buildkite-agent pipeline upload
       steps:
-        - label: "💤 Sleep 10s (inside gate)"
-          command: 'echo "Sleeping at \$(date +%H:%M:%S)" && sleep 10'
-          concurrency: 1
-          concurrency_group: test-gate-1
-          concurrency_method: eager
-        
-        - wait
-        
-        - label: "🔴 End Gate-1"
-          command: 'echo "Closing gate-1 at \$(date +%H:%M:%S)"'
-          concurrency: 1
-          concurrency_group: test-gate-1
-          concurrency_method: eager
-        
-        - label: "✅ After gate"
-          command: 'echo "Completed at \$(date +%H:%M:%S)"'
+        - label: "📦 Build frontend"
+          command: |
+            echo "Building frontend..."
+            ls -la frontend/ || echo "frontend/ directory not found"
+            
+        - label: "🔨 Build backend"
+          command: |
+            echo "Building backend..."
+            ls -la backend/ || echo "backend/ directory not found"
       EOF
+      else
+        echo "🎯 Conditional build mode - using if_changed"
+        cat <<EOF | buildkite-agent pipeline upload
+      steps:
+        - label: "📦 Build frontend"
+          command: |
+            echo "Building frontend (triggered by frontend changes)..."
+            ls -la frontend/
+          if_changed: "frontend/**"
+          
+        - label: "🔨 Build backend"
+          command: |
+            echo "Building backend (triggered by backend changes)..."
+            ls -la backend/
+          if_changed: "backend/**"
+      EOF
+      fi
