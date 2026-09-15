@@ -1,0 +1,20 @@
+name: Temporary PR close pipeline trigger test
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  trigger-buildkite:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Buildkite
+        env:
+          BUILDKITE_TRIGGER_URL: ${{ secrets.BUILDKITE_TRIGGER_URL }}
+        run: |
+          curl --fail-with-body \
+            --header "Content-Type: application/json" \
+            --header "X-GitHub-Event: pull_request" \
+            --request POST \
+            --data-binary "@${GITHUB_EVENT_PATH}" \
+            "${BUILDKITE_TRIGGER_URL}"
