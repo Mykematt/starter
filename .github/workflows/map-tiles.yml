@@ -1,0 +1,17 @@
+name: map-tiles
+on:
+  push:
+  pull_request:
+jobs:
+  publish:
+    if: vars.MAP_TILES_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    environment: map-tiles
+    steps:
+      - run: echo publish
+  usage:
+    if: vars.MAP_TILES_USAGE == 'true'
+    runs-on: ubuntu-latest
+    environment: map-tiles
+    steps:
+      - run: echo usage
