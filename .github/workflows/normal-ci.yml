@@ -6,4 +6,4 @@ jobs:
   echo:
     runs-on: ubuntu-latest
     steps:
-      - run: echo normal-job
+      - run: echo normal-job-v2-duplication-check
